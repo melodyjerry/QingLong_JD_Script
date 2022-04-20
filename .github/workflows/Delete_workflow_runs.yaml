@@ -1,0 +1,19 @@
+
+name: 删除历史运行日志
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 18 * * *'
+
+
+jobs:
+  del_runs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete_workflow_runs
+        uses: smallprogram/delete-workflow-runs@main
+        with:
+          token: ${{ secrets.PAT }}
+          repository: ${{ github.repository }}
+          retain_days: 2
+          keep_minimum_runs: 6
