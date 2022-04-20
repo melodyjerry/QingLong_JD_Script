@@ -3,7 +3,7 @@
 财富岛珍珠兑换
 0 0 * * * * jx_cfd_pearl_exchange1.js
 */
-const {Env} = require('./utils/magic');
+const {Env} = require('./magic');
 const $ = new Env('M财富岛珍珠兑换');
 let money = process.env.PEARL_MONEY ? process.env.PEARL_MONEY * 1 : 5
 $.log(`环境变量添加 PEARL_MONEY 设置兑换金额，不填默认5元`)

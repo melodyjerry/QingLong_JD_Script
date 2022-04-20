@@ -2,24 +2,28 @@ const https = require('https');
 const fs = require('fs/promises');
 const { R_OK } = require('fs').constants;
 const vm = require('vm');
+const UA = require('../USER_AGENTS.js').USER_AGENT;
+
 const URL = 'https://wbbny.m.jd.com/babelDiy/Zeus/2rtpffK8wqNyPBH6wyUDuBKoAbCt/index.html';
 // const REG_MODULE = /(\d+)\:function\(.*(?=smashUtils\.get_risk_result)/gm;
 const SYNTAX_MODULE = '!function(n){var r={};function o(e){if(r[e])';
 const REG_SCRIPT = /<script type="text\/javascript" src="([^><]+\/(app\.\w+\.js))\">/gm;
-const REG_ENTRY = /(__webpack_require__\(__webpack_require__.s=)(\d+)(?=\)})/;
-const needModuleId = 355
+const REG_ENTRY = /(__webpack_require__\(__webpack_require__\.s=)(\d+)(?=\)})/;
+const needModuleId = 356
 const DATA = {appid:'50085',sceneid:'OY217hPageh5'};
 let smashUtils;
-class MovementFaker {
+
+class MoveMentFaker {
   constructor(cookie) {
     // this.secretp = secretp;
     this.cookie = cookie;
-    this.ua = require('./USER_AGENTS.js').USER_AGENT;
   }
+
   async run() {
     if (!smashUtils) {
       await this.init();
     }
+
     var t = Math.floor(1e7 + 9e7 * Math.random()).toString();
     var e = smashUtils.get_risk_result({
       id: t,
@@ -29,22 +33,23 @@ class MovementFaker {
     }).log;
     var o = JSON.stringify({
       extraData: {
-        log:  e || -1,
-        // log: encodeURIComponent(e),
-        sceneid: DATA.sceneid,
+        log: e || -1,
+          // log: encodeURIComponent(e),
+          sceneid: DATA.sceneid,
       },
       // secretp: this.secretp,
       random: t
     })
+
     // console.log(o);
     return o;
   }
 
   async init() {
     try {
-      console.time('MovementFaker');
+      // console.time('MoveMentFaker');
       process.chdir(__dirname);
-      const html = await MovementFaker.httpGet(URL);
+      const html = await MoveMentFaker.httpGet(URL);
       const script = REG_SCRIPT.exec(html);
 
       if (script) {
@@ -56,9 +61,9 @@ class MovementFaker {
           document: {
             addEventListener: fnMock,
             removeEventListener: fnMock,
-            cookie: this.cookie,
+            cookie: this.cookie
           },
-          navigator: { userAgent: this.ua },
+          navigator: { userAgent: UA }
         };
 
         vm.createContext(ctx);
@@ -71,7 +76,7 @@ class MovementFaker {
 
       // console.log(html);
       // console.log(script[1],script[2]);
-      console.timeEnd('MovementFaker');
+      // console.timeEnd('MoveMentFaker');
     } catch (e) {
       console.log(e)
     }
@@ -84,14 +89,13 @@ class MovementFaker {
 
       return rawFile;
     } catch (e) {
-      let jsContent = await MovementFaker.httpGet(url);
+      let jsContent = await MoveMentFaker.httpGet(url);
       const moduleIndex = jsContent.indexOf(SYNTAX_MODULE, 1);
       const findEntry = REG_ENTRY.test(jsContent);
-      //console.log(jsContent)
       if (!(moduleIndex && findEntry)) {
         throw new Error('Module not found.');
       }
-      // const needModuleId = jsContent.substring(moduleIndex-20, moduleIndex).match(/(\d+):function/)[1]
+        // const needModuleId = jsContent.substring(moduleIndex-20, moduleIndex).match(/(\d+):function/)[1]
       jsContent = jsContent.replace(REG_ENTRY, `$1${needModuleId}`);
       fs.writeFile(cacheKey, jsContent);
       return jsContent;
@@ -99,8 +103,8 @@ class MovementFaker {
       REG_ENTRY.lastIndex = 0;
       const entry = REG_ENTRY.exec(jsContent);
 
-      //(moduleIndex, needModuleId);
-      //console.log(entry[1], entry[2]);
+      console.log(moduleIndex, needModuleId);
+      console.log(entry[1], entry[2]);
     }
   }
 
@@ -124,12 +128,12 @@ class MovementFaker {
 }
 
 async function getBody($) {
-  const zf = new MovementFaker($.cookie);
-  // const zf = new MovementFaker($.secretp, $.cookie);
+  const zf = new MoveMentFaker($.cookie);
+  // const zf = new MoveMentFaker($.secretp, $.cookie);
   const ss = await zf.run();
 
   return ss;
 }
 
-MovementFaker.getBody = getBody;
-module.exports = MovementFaker;
+MoveMentFaker.getBody = getBody;
+module.exports = MoveMentFaker;
